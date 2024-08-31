@@ -1,4 +1,4 @@
-package com.github.lupaev.shcoolgroups;
+package com.github.lupaev.schoolgroups;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

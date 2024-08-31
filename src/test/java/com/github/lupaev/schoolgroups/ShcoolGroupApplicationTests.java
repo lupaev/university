@@ -1,10 +1,10 @@
-package com.github.lupaev.shcoolgroups;
+package com.github.lupaev.schoolgroups;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class ShcoolGroupsApplicationTests {
+class ShcoolGroupApplicationTests {
 
     @Test
     void contextLoads() {
