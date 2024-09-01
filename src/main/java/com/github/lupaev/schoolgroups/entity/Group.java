@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Getter
 @Setter
@@ -26,7 +25,4 @@ public class Group {
 
     @Column(name = "CREATED_AT")
     private LocalDateTime createdAt;
-
-    @OneToMany(mappedBy = "group", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    private List<Student> students;
 }

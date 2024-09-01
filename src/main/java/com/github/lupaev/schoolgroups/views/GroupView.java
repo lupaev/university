@@ -10,11 +10,12 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteParameters;
+import com.vaadin.flow.server.VaadinSession;
 
 import java.time.LocalDateTime;
 
 @Route("")
-@PageTitle("Groups")
+@PageTitle("Группы университета")
 public class GroupView extends VerticalLayout {
 
     private final GroupService groupService;
@@ -35,18 +36,20 @@ public class GroupView extends VerticalLayout {
     private void configureGrid() {
         groupGrid.removeAllColumns(); // Удаляем все стандартные колонки
 
-        // Добавляем пользовательские колонки
+        // Добавляем необходимые колонки
         groupGrid.addColumn(GroupDto::getGroupNumber).setHeader("Номер");
         groupGrid.addColumn(GroupDto::getStudentCount).setHeader("Количество студентов");
 
         // Добавляем колонку для действий
-        groupGrid.addComponentColumn(groupDto -> new Button("Редактировать", click -> getUI().ifPresent(ui ->
-                ui.navigate(StudentView.class, new RouteParameters("groupId",
-                        String.valueOf(groupDto.getId())))))).setHeader("Действия");
+        groupGrid.addComponentColumn(groupDto -> new Button("Редактировать", click -> {
+            VaadinSession.getCurrent().setAttribute("selectedGroup", groupDto);
+            getUI().ifPresent(ui -> ui.navigate(StudentView.class, new RouteParameters("groupId", String.valueOf(groupDto.getId()))));
+        })).setHeader("Действия");
 
-        groupGrid.addItemDoubleClickListener(event -> getUI().ifPresent(ui -> ui.navigate(StudentView.class,
-                new RouteParameters("groupId", String.valueOf(event.getItem().getId())))));
-
+        groupGrid.addItemDoubleClickListener(event -> {
+            VaadinSession.getCurrent().setAttribute("selectedGroup", event.getItem());
+            getUI().ifPresent(ui -> ui.navigate(StudentView.class, new RouteParameters("groupId", String.valueOf(event.getItem().getId()))));
+        });
     }
 
     private void configureForm() {
@@ -60,6 +63,7 @@ public class GroupView extends VerticalLayout {
             // Проверяем, что savedGroup имеет корректный ID
             if (savedGroup != null && savedGroup.getId() != null) {
                 getUI().ifPresent(ui -> ui.navigate(StudentView.class, new RouteParameters("groupId", String.valueOf(savedGroup.getId()))));
+                VaadinSession.getCurrent().setAttribute("selectedGroup", savedGroup);
             } else {
                 Notification.show("Ошибка: группа не была сохранена корректно.");
             }

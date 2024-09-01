@@ -1,6 +1,7 @@
 package com.github.lupaev.schoolgroups.service;
 
 import com.github.lupaev.schoolgroups.dto.GroupDto;
+import com.github.lupaev.schoolgroups.entity.Group;
 import com.github.lupaev.schoolgroups.mapper.GroupMapper;
 import com.github.lupaev.schoolgroups.repository.GroupRepository;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +16,14 @@ public class GroupService {
     private final GroupMapper groupMapper;
 
     public List<GroupDto> getAllGroups() {
-        return groupMapper.toDto(groupRepository.findAllByOrderByCreatedAtAsc());
+        List<Group> groups = groupRepository.findAllByOrderByCreatedAtAsc();
+        return groups.stream()
+                .map(group -> {
+                    GroupDto dto = groupMapper.toDto(group);
+                    dto.setStudentCount(groupRepository.countStudentsByGroupId(group.getId()).intValue());
+                    return dto;
+                })
+                .toList();
     }
 
     public GroupDto saveGroup(GroupDto groupDto) {

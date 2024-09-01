@@ -10,15 +10,9 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface StudentMapper {
 
-    @Mapping(target = "id", source = "id")
-    @Mapping(target = "fullName", source = "fullName")
-    @Mapping(target = "dateReceipt", source = "dateReceipt")
     @Mapping(target = "groupId", source = "group.id")
     StudentDto toDto(Student student);
 
-    @Mapping(target = "id", source = "id")
-    @Mapping(target = "fullName", source = "fullName")
-    @Mapping(target = "dateReceipt", source = "dateReceipt")
     @Mapping(target = "group.id", source = "groupId")
     Student toEntity(StudentDto studentDto);
 

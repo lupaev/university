@@ -25,7 +25,7 @@ public class Student {
     @Column(name = "DATE_RECEIPT")
     private LocalDate dateReceipt;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.REFRESH)
     @JoinColumn(name = "STUDENT_GROUP_ID")
     private Group group;
 }
