@@ -11,9 +11,11 @@ import java.util.List;
 public interface StudentMapper {
 
     @Mapping(target = "groupId", source = "group.id")
+    @Mapping(target = "dateReceipt", source = "dateReceipt", dateFormat = "dd.MM.yyyy")
     StudentDto toDto(Student student);
 
     @Mapping(target = "group.id", source = "groupId")
+    @Mapping(target = "dateReceipt", source = "dateReceipt", dateFormat = "yyyy-MM-dd")
     Student toEntity(StudentDto studentDto);
 
     List<StudentDto> toDto(List<Student> students);

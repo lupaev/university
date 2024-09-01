@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Route("students/:groupId")
-@PageTitle("Students")
+@PageTitle("Список студентов группы")
 public class StudentView extends VerticalLayout implements BeforeEnterObserver {
 
     private final StudentService studentService;
@@ -66,7 +66,7 @@ public class StudentView extends VerticalLayout implements BeforeEnterObserver {
         addStudentButton.addClickListener(e -> {
             StudentDto studentDto = new StudentDto();
             studentDto.setFullName(fullNameField.getValue());
-            studentDto.setDateReceipt(LocalDate.now());
+            studentDto.setDateReceipt(LocalDate.now().toString());
             studentDto.setGroupId(groupId);
             StudentDto dto = studentService.saveStudent(studentDto);
             studentList.add(dto);
