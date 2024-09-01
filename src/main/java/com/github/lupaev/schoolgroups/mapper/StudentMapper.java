@@ -17,6 +17,4 @@ public interface StudentMapper {
     @Mapping(target = "group.id", source = "groupId")
     @Mapping(target = "dateReceipt", source = "dateReceipt", dateFormat = "yyyy-MM-dd")
     Student toEntity(StudentDto studentDto);
-
-    List<StudentDto> toDto(List<Student> students);
 }

@@ -3,10 +3,12 @@ package com.github.lupaev.schoolgroups.views;
 import com.github.lupaev.schoolgroups.dto.GroupDto;
 import com.github.lupaev.schoolgroups.dto.StudentDto;
 import com.github.lupaev.schoolgroups.service.StudentService;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.BeforeEnterEvent;
@@ -29,8 +31,12 @@ public class StudentView extends VerticalLayout implements BeforeEnterObserver {
     private final Button addStudentButton = new Button("Принять нового студента");
     private final Button backButton = new Button("Вернуться к списку групп");
     private Long groupId;
-    private GroupDto groupDto;
     private List<StudentDto> studentList = new ArrayList<>();
+    private Button previousButton;
+    private Button nextButton;
+    // Параметры пагинации
+    private int currentPage = 0;
+    private final int pageSize = 20;
 
     public StudentView(StudentService studentService) {
         this.studentService = studentService;
@@ -38,7 +44,7 @@ public class StudentView extends VerticalLayout implements BeforeEnterObserver {
         configureGrid();
         configureForm();
 
-        add(studentGrid, fullNameField, addStudentButton, backButton);
+        add(studentGrid, configurePaginationLayout(), fullNameField, addStudentButton, backButton);
     }
 
     private void configureGrid() {
@@ -71,6 +77,7 @@ public class StudentView extends VerticalLayout implements BeforeEnterObserver {
             StudentDto dto = studentService.saveStudent(studentDto);
             studentList.add(dto);
             studentGrid.getDataProvider().refreshAll();
+            updatePaginationButtons();
             Notification.show("Студент зачислен");
             fullNameField.clear();
         });
@@ -79,16 +86,41 @@ public class StudentView extends VerticalLayout implements BeforeEnterObserver {
         backButton.addClickListener(e -> getUI().ifPresent(ui -> ui.navigate(GroupView.class)));
     }
 
+    private Component configurePaginationLayout() {
+        previousButton = new Button("Предыдущая", e -> {
+            if (currentPage > 0) {
+                currentPage--;
+                updateStudentList();
+            }
+        });
+
+        nextButton = new Button("Следующая", e -> {
+            currentPage++;
+            updateStudentList();
+        });
+
+        return new HorizontalLayout(previousButton, nextButton);
+    }
+
+    private void updatePaginationButtons() {
+        // Отключаем кнопку "Предыдущая", если находимся на первой странице
+        previousButton.setEnabled(currentPage > 0);
+        // Отключаем кнопку "Следующая", если текущая страница заполнена не полностью
+        nextButton.setEnabled(studentList.size() == pageSize);
+    }
+
     private void updateStudentList() {
-        studentList = studentService.getStudentsByGroup(groupId);
+        // Количество элементов на странице
+        studentList = new ArrayList<>(studentService.getStudentsByGroup(groupId, currentPage, pageSize));
         studentGrid.setItems(studentList);
+        updatePaginationButtons();
     }
 
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
         groupId = Long.valueOf(event.getRouteParameters().get("groupId").orElse("0"));
         // Извлекаем данные группы из сессии
-        groupDto = (GroupDto) VaadinSession.getCurrent().getAttribute("selectedGroup");
+        GroupDto groupDto = (GroupDto) VaadinSession.getCurrent().getAttribute("selectedGroup");
 
         if (groupDto != null) {
             // Устанавливаем заголовок страницы
