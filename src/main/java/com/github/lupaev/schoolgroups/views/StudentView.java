@@ -7,6 +7,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -124,13 +125,17 @@ public class StudentView extends VerticalLayout implements BeforeEnterObserver {
 
         if (groupDto != null) {
             // Устанавливаем заголовок страницы
-            UI.getCurrent().getPage().setTitle("Группа № " + groupDto.getGroupNumber());
+            addComponentAsFirst(createTitle(groupDto.getGroupNumber()));
             // Обновляем список студентов
             updateStudentList();
         } else {
             // Обработка случая, когда данные группы не найдены
             Notification.show("Ошибка: данные группы не найдены.");
         }
+    }
+
+    private Component createTitle(String groupNumber) {
+        return new H1("Группа № " + groupNumber);
     }
 
 }

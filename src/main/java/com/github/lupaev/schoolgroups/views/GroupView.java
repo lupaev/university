@@ -5,6 +5,7 @@ import com.github.lupaev.schoolgroups.service.GroupService;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -40,7 +41,7 @@ public class GroupView extends VerticalLayout {
         configureGrid();
         configureForm();
 
-        add(groupGrid, groupNameField, addGroupButton, configurePaginationLayout());
+        add(createTitle(), groupGrid, groupNameField, addGroupButton, configurePaginationLayout());
         updateGroupList();
     }
 
@@ -110,5 +111,9 @@ public class GroupView extends VerticalLayout {
         groups = new ArrayList<>(groupService.getGroups(currentPage, pageSize));
         groupGrid.setItems(groups);
         updatePaginationButtons();
+    }
+
+    private Component createTitle() {
+        return new H1("Группы университета");
     }
 }
