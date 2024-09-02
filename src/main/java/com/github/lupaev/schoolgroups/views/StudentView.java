@@ -4,7 +4,6 @@ import com.github.lupaev.schoolgroups.dto.GroupDto;
 import com.github.lupaev.schoolgroups.dto.StudentDto;
 import com.github.lupaev.schoolgroups.service.StudentService;
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.H1;

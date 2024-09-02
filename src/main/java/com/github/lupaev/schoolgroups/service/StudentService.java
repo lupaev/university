@@ -8,12 +8,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-import static com.github.lupaev.schoolgroups.specification.StudentSpecification.hasGroupIdAndOrderByFullNameAsc;
 
 @Service
 @RequiredArgsConstructor
@@ -26,6 +26,13 @@ public class StudentService {
         Page<Student> students = studentRepository.findAll(hasGroupIdAndOrderByFullNameAsc(groupId), pageable);
 
         return students.stream().map(studentMapper::toDto).toList();
+    }
+
+    private Specification<Student> hasGroupIdAndOrderByFullNameAsc(Long groupId) {
+        return (root, query, cb) -> {
+            query.orderBy(cb.asc(root.get("fullName")));
+            return cb.equal(root.get("group").get("id"), groupId);
+        };
     }
 
     @Transactional
