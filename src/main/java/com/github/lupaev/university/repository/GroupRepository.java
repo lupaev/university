@@ -1,8 +1,7 @@
-package com.github.lupaev.schoolgroups.repository;
+package com.github.lupaev.university.repository;
 
-import com.github.lupaev.schoolgroups.entity.Group;
+import com.github.lupaev.university.entity.Group;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
 @Repository

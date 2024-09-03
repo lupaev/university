@@ -1,7 +1,7 @@
-package com.github.lupaev.schoolgroups.mapper;
+package com.github.lupaev.university.mapper;
 
-import com.github.lupaev.schoolgroups.dto.GroupDto;
-import com.github.lupaev.schoolgroups.entity.Group;
+import com.github.lupaev.university.dto.GroupDto;
+import com.github.lupaev.university.entity.Group;
 import org.mapstruct.Mapper;
 
 @Mapper(componentModel = "spring")

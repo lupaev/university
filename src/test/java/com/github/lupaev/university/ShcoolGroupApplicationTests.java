@@ -1,4 +1,4 @@
-package com.github.lupaev.schoolgroups;
+package com.github.lupaev.university;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
