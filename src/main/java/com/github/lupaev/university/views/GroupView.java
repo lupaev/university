@@ -142,7 +142,7 @@ public class GroupView extends VerticalLayout {
         // Отключаем кнопку "Предыдущая", если находимся на первой странице
         previousButton.setEnabled(currentPage > 0);
         // Отключаем кнопку "Следующая", если текущая страница заполнена не полностью
-        nextButton.setEnabled(groups.size() == pageSize);
+        nextButton.setEnabled(groups.size() >= pageSize);
     }
 
     /**

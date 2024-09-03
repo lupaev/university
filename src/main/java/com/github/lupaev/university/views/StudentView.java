@@ -144,7 +144,7 @@ public class StudentView extends VerticalLayout implements BeforeEnterObserver {
         // Отключаем кнопку "Предыдущая", если находимся на первой странице
         previousButton.setEnabled(currentPage > 0);
         // Отключаем кнопку "Следующая", если текущая страница заполнена не полностью
-        nextButton.setEnabled(studentList.size() == pageSize);
+        nextButton.setEnabled(studentList.size() >= pageSize);
     }
 
     /**
