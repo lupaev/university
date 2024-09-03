@@ -8,6 +8,7 @@ import com.github.lupaev.university.repository.GroupRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -78,13 +79,17 @@ public class GroupService {
      */
     @Transactional
     public GroupDto saveGroup(GroupDto groupDto) {
-        // Преобразование DTO в сущность
-        Group entity = groupMapper.toEntity(groupDto);
+        try {
+            // Преобразование DTO в сущность
+            Group entity = groupMapper.toEntity(groupDto);
 
-        // Сохранение сущности в базе данных
-        Group savedEntity = groupRepository.save(entity);
+            // Сохранение сущности в базе данных
+            Group savedEntity = groupRepository.save(entity);
 
-        // Преобразование сохраненной сущности обратно в DTO
-        return groupMapper.toDto(savedEntity);
+            // Преобразование сохраненной сущности обратно в DTO
+            return groupMapper.toDto(savedEntity);
+        } catch (DataIntegrityViolationException e) {
+            throw new IllegalArgumentException("Группа с таким номером уже существует.", e);
+        }
     }
 }

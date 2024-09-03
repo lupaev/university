@@ -1,6 +1,5 @@
 package com.github.lupaev.university.views;
 
-import com.github.lupaev.university.dto.GroupDto;
 import com.github.lupaev.university.dto.StudentDto;
 import com.github.lupaev.university.service.StudentService;
 import com.vaadin.flow.component.Component;
@@ -20,6 +19,8 @@ import com.vaadin.flow.server.VaadinSession;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.vaadin.flow.component.notification.Notification.Position.MIDDLE;
 
 /**
  * Представление для отображения и управления студентами в группе.
@@ -73,7 +74,7 @@ public class StudentView extends VerticalLayout implements BeforeEnterObserver {
                 studentService.deleteStudent(student.getId());
                 studentList.remove(student); // Удаляем студента из локального списка
                 studentGrid.getDataProvider().refreshAll(); // Обновляем грид без запроса в БД
-                Notification.show("Студент удален");
+                Notification.show("Студент удален", 3000, MIDDLE);
             });
             return deleteButton;
         }).setHeader("Действие");
@@ -87,16 +88,28 @@ public class StudentView extends VerticalLayout implements BeforeEnterObserver {
     private void configureForm() {
         // Кнопка добавления нового студента
         addStudentButton.addClickListener(e -> {
-            StudentDto studentDto = new StudentDto();
-            studentDto.setFullName(fullNameField.getValue());
-            studentDto.setAdmissionDate(LocalDate.now().toString());
-            studentDto.setGroupId(groupId);
-            StudentDto dto = studentService.saveStudent(studentDto);
-            studentList.add(dto);
-            studentGrid.getDataProvider().refreshAll();
-            updatePaginationButtons();
-            Notification.show("Студент зачислен");
-            fullNameField.clear();
+            String value = fullNameField.getValue();
+            try {
+                if (value.isEmpty()) {
+                    throw new IllegalArgumentException("ФИО не может быть пустым.");
+                }
+
+                StudentDto studentDto = new StudentDto();
+                studentDto.setFullName(value);
+                studentDto.setAdmissionDate(LocalDate.now().toString());
+                studentDto.setGroupId(groupId);
+
+                StudentDto dto = studentService.saveStudent(studentDto);
+                studentList.add(dto);
+                studentGrid.getDataProvider().refreshAll();
+                updatePaginationButtons();
+                Notification.show("Студент зачислен", 3000, MIDDLE);
+                fullNameField.clear();
+            } catch (IllegalArgumentException ex) {
+                Notification.show(ex.getMessage());
+            } catch (Exception ex) {
+                Notification.show("Произошла ошибка при добавлении студента.", 3000, MIDDLE);
+            }
         });
 
         // Кнопка возврата к списку групп
@@ -138,10 +151,16 @@ public class StudentView extends VerticalLayout implements BeforeEnterObserver {
      * Обновляет список студентов в таблице.
      */
     private void updateStudentList() {
-        // Получаем список студентов с учетом текущей страницы и размера страницы. Загрузка осуществляется один раз при обновлении страницы
-        studentList = new ArrayList<>(studentService.getStudentsByGroup(groupId, currentPage, pageSize));
-        studentGrid.setItems(studentList);
-        updatePaginationButtons();
+        try {
+            // Получаем список студентов с учетом текущей страницы и размера страницы. Загрузка осуществляется один раз при обновлении страницы
+            studentList = new ArrayList<>(studentService.getStudentsByGroup(groupId, currentPage, pageSize));
+            //Добавляем полученный список в грид
+            studentGrid.setItems(studentList);
+            //Проверяем кнопки пагинации
+            updatePaginationButtons();
+        } catch (Exception ex) {
+            Notification.show("Не удалось загрузить список студентов.", 3000, MIDDLE);
+        }
     }
 
     /**
@@ -152,18 +171,23 @@ public class StudentView extends VerticalLayout implements BeforeEnterObserver {
      */
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
-        groupId = Long.valueOf(event.getRouteParameters().get("groupId").orElse("0"));
-        // Извлекаем данные группы из сессии
-        GroupDto groupDto = (GroupDto) VaadinSession.getCurrent().getAttribute("selectedGroup");
+        try {
+            //получаем groupId при переходе со страницы группы
+            groupId = Long.valueOf(event.getRouteParameters().get("groupId").orElseThrow(() ->
+                    new IllegalArgumentException("Идентификатор группы не указан.")));
+            // Извлекаем данные группы из сессии
+            String selectedGroupName = (String) VaadinSession.getCurrent().getAttribute("selectedGroupName");
 
-        if (groupDto != null) {
-            // Устанавливаем заголовок страницы
-            addComponentAsFirst(createTitle(groupDto.getGroupNumber()));
-            // Обновляем список студентов
-            updateStudentList();
-        } else {
-            // Обработка случая, когда данные группы не найдены
-            Notification.show("Ошибка: данные группы не найдены.");
+            if (selectedGroupName != null && !selectedGroupName.isEmpty()) {
+                // Устанавливаем заголовок страницы
+                addComponentAsFirst(createTitle(selectedGroupName));
+                // Обновляем список студентов
+                updateStudentList();
+            } else {
+                throw new IllegalStateException("Данные группы не найдены.");
+            }
+        } catch (Exception ex) {
+            Notification.show("Ошибка: " + ex.getMessage(), 3000, MIDDLE);
         }
     }
 

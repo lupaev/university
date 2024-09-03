@@ -67,13 +67,14 @@ public class GroupView extends VerticalLayout {
         // Добавляем колонку для действий
         groupGrid.addComponentColumn(groupDto -> new Button("Редактировать", click -> {
             // Сохраняем выбранную группу в сессии и переходим к просмотру студентов
-            VaadinSession.getCurrent().setAttribute("selectedGroup", groupDto);
+            VaadinSession.getCurrent().setAttribute("selectedGroupName", groupDto.getGroupNumber());
             getUI().ifPresent(ui -> ui.navigate(StudentView.class, new RouteParameters("groupId", String.valueOf(groupDto.getId()))));
         })).setHeader("Действия");
 
         // Добавляем обработчик двойного клика по строке
         groupGrid.addItemDoubleClickListener(event -> {
-            VaadinSession.getCurrent().setAttribute("selectedGroup", event.getItem());
+            // Сохраняем выбранную группу в сессии и переходим к просмотру студентов
+            VaadinSession.getCurrent().setAttribute("selectedGroupName", event.getItem().getGroupNumber());
             getUI().ifPresent(ui -> ui.navigate(StudentView.class, new RouteParameters("groupId", String.valueOf(event.getItem().getId()))));
         });
     }
@@ -82,26 +83,33 @@ public class GroupView extends VerticalLayout {
      * Настраивает форму для добавления новой группы.
      */
     private void configureForm() {
+        // Кнопка добавления группы
         addGroupButton.addClickListener(e -> {
-            GroupDto groupDto = new GroupDto();
-            groupDto.setGroupNumber(groupNameField.getValue());
-            groupDto.setCreatedAt(LocalDateTime.now());
-            //Сохраняем новую группу
-            GroupDto savedGroup = groupService.saveGroup(groupDto);
-            //Обновляем состояние грида без запроса в БД
-            groupGrid.getDataProvider().refreshAll();
-            // обновляем состояние кнопок пагинации
-            updatePaginationButtons();
-            //очищаем поле ввода после добавления группы
-            groupNameField.clear();
+            try {
+                GroupDto groupDto = new GroupDto();
+                groupDto.setGroupNumber(groupNameField.getValue());
+                groupDto.setCreatedAt(LocalDateTime.now());
 
-            // Проверяем, что savedGroup имеет корректный ID
-            if (savedGroup != null && savedGroup.getId() != null) {
-                // Сохраняем выбранную группу в сессии и переходим к просмотру студентов
-                getUI().ifPresent(ui -> ui.navigate(StudentView.class, new RouteParameters("groupId", String.valueOf(savedGroup.getId()))));
-                VaadinSession.getCurrent().setAttribute("selectedGroup", savedGroup);
-            } else {
-                Notification.show("Ошибка: группа не была сохранена корректно.");
+                // Сохраняем новую группу
+                GroupDto savedGroup = groupService.saveGroup(groupDto);
+
+                // Проверяем, что savedGroup имеет корректный ID
+                if (savedGroup != null && savedGroup.getId() != null) {
+                    //Обновляем грид без обращения в БД
+                    groupGrid.getDataProvider().refreshAll();
+                    //Очищаем поле ввода
+                    groupNameField.clear();
+                    //Добавляем номер группы в сессию для перехода на другую страницу
+                    VaadinSession.getCurrent().setAttribute("selectedGroupName", savedGroup.getGroupNumber());
+                    getUI().ifPresent(ui -> ui.navigate(
+                            StudentView.class,
+                            new RouteParameters("groupId", String.valueOf(savedGroup.getId())))
+                    );
+                }
+            } catch (IllegalArgumentException ex) {
+                Notification.show(ex.getMessage(), 5000, Notification.Position.MIDDLE);
+            } catch (Exception ex) {
+                Notification.show("Произошла ошибка при сохранении группы.", 3000, Notification.Position.MIDDLE);
             }
         });
     }
@@ -141,12 +149,16 @@ public class GroupView extends VerticalLayout {
      * Обновляет список групп в таблице.
      */
     private void updateGroupList() {
-        // Получаем список групп с учетом текущей страницы и размера страницы. Загрузка осуществляется один раз при обновлении страницы
-        groups = new ArrayList<>(groupService.getGroups(currentPage, pageSize));
-        //Добавляем полученный список в грид
-        groupGrid.setItems(groups);
-        //Проверяем кнопки пагинации
-        updatePaginationButtons();
+        try {
+            // Получаем список групп с учетом текущей страницы и размера страницы. Загрузка осуществляется один раз при обновлении страницы
+            groups = new ArrayList<>(groupService.getGroups(currentPage, pageSize));
+            //Добавляем полученный список в грид
+            groupGrid.setItems(groups);
+            //Проверяем кнопки пагинации
+            updatePaginationButtons();
+        } catch (Exception ex) {
+            Notification.show("Не удалось загрузить список групп.", 3000, Notification.Position.MIDDLE);
+        }
     }
 
     /**
