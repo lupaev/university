@@ -1,5 +1,6 @@
 package com.github.lupaev.university.dto;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -24,6 +25,7 @@ public class GroupDto {
     /**
      * Номер группы.
      */
+    @NotBlank
     private String groupNumber;
 
     /**
