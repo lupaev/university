@@ -5,6 +5,7 @@ import com.github.lupaev.university.entity.Student;
 import com.github.lupaev.university.mapper.StudentMapper;
 import com.github.lupaev.university.repository.StudentRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -19,6 +20,7 @@ import java.util.List;
  */
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class StudentService {
     private final StudentRepository studentRepository;
     private final StudentMapper studentMapper;
@@ -32,6 +34,7 @@ public class StudentService {
      * @return список DTO студентов, отсортированных по полному имени.
      */
     public List<StudentDto> getStudentsByGroup(Long groupId, int page, int size) {
+        log.info("Получение списка студентов для группы: groupId={}, page={}, size={}", groupId, page, size);
         // Создаем объект Pageable для управления пагинацией
         Pageable pageable = PageRequest.of(page, size);
 
@@ -39,7 +42,10 @@ public class StudentService {
         Page<Student> students = studentRepository.findAll(hasGroupIdAndOrderByFullNameAsc(groupId), pageable);
 
         // Преобразуем сущности студентов в DTO и возвращаем список
-        return students.stream().map(studentMapper::toDto).toList();
+        List<StudentDto> studentDtoList = students.stream().map(studentMapper::toDto).toList();
+
+        log.info("Получено {} студентов для группы с ID: {}", studentDtoList.size(), groupId);
+        return studentDtoList;
     }
 
     /**
@@ -66,9 +72,11 @@ public class StudentService {
      */
     @Transactional
     public StudentDto saveStudent(StudentDto studentDto) {
+        log.debug("Сохранение студента: {}", studentDto);
         // Преобразуем DTO в сущность и сохраняем в базе данных
         Student saved = studentRepository.save(studentMapper.toEntity(studentDto));
 
+        log.info("Студент сохранен с ID: {}", saved.getId());
         // Преобразуем сохраненную сущность обратно в DTO и возвращаем
         return studentMapper.toDto(saved);
     }
@@ -80,6 +88,7 @@ public class StudentService {
      */
     @Transactional
     public void deleteStudent(Long id) {
+        log.info("Удаление студента с ID: {}", id);
         // Удаляем студента из базы данных по идентификатору
         studentRepository.deleteById(id);
     }

@@ -8,6 +8,7 @@ import com.github.lupaev.university.repository.GroupRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.*;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -21,6 +22,7 @@ import java.util.List;
  */
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class GroupService {
     private final GroupRepository groupRepository;
     private final GroupMapper groupMapper;
@@ -34,6 +36,8 @@ public class GroupService {
      * @return список DTO групп с количеством студентов в каждой группе.
      */
     public List<GroupDto> getGroups(int page, int size) {
+        log.info("Получение списка групп: page={}, size={}", page, size);
+
         // Создаем объект Pageable для управления пагинацией
         Pageable pageable = PageRequest.of(page, size);
 
@@ -63,12 +67,16 @@ public class GroupService {
                 // Устанавливаем порядок сортировки по дате создания группы
                 .orderBy(cb.asc(groupRoot.get("createdAt")));
 
+
         // Выполняем запрос с учетом пагинации
         // setFirstResult и setMaxResults используются для ограничения количества возвращаемых результатов
-        return entityManager.createQuery(query)
+        List<GroupDto> result = entityManager.createQuery(query)
                 .setFirstResult((int) pageable.getOffset()) // Устанавливаем начальный индекс для пагинации
                 .setMaxResults(pageable.getPageSize()) // Устанавливаем максимальное количество результатов на страницу
-                .getResultList(); // Получаем список результатов
+                .getResultList();// Получаем список результатов
+
+        log.info("Получено {} групп", result.size());
+        return result;
     }
 
     /**
@@ -79,6 +87,7 @@ public class GroupService {
      */
     @Transactional
     public GroupDto saveGroup(GroupDto groupDto) {
+        log.info("Сохранение группы: {}", groupDto);
         try {
             // Преобразование DTO в сущность
             Group entity = groupMapper.toEntity(groupDto);
@@ -86,9 +95,12 @@ public class GroupService {
             // Сохранение сущности в базе данных
             Group savedEntity = groupRepository.save(entity);
 
+            log.info("Группа сохранена с ID: {}", savedEntity.getId());
+
             // Преобразование сохраненной сущности обратно в DTO
             return groupMapper.toDto(savedEntity);
         } catch (DataIntegrityViolationException e) {
+            log.error("Группа с таким номером уже существует: {}", groupDto.getGroupNumber(), e);
             throw new IllegalArgumentException("Группа с таким номером уже существует.", e);
         }
     }
