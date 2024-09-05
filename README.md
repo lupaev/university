@@ -33,5 +33,5 @@ docker compose up -d
 
 4. Остановка приложения и повторный запуск
 ```bash
-docker-compose stop && docker-compose up -d
+docker compose stop && docker compose up -d
 ```
