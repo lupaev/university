@@ -14,9 +14,24 @@ University Management System — это приложение для управл
 * Миграции базы данных: Liquibase
 * Сборка: Gradle
 
-#### Установка
+#### Установка и запуск
 
+1. Клонирование репозитория:
 ```bash
 git clone http://github.com/yourusername/university.git
 cd university
+```
+
+2. Запуск с помощью Docker Compose:
+```bash
+docker compose up -d
+```
+
+3. Доступ к приложению:
+   Перейдите на страницу http://localhost:8081 в вашем браузере.
+
+
+4. Остановка приложения и повторный запуск
+```bash
+docker-compose stop && docker-compose up -d
 ```
