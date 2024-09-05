@@ -6,12 +6,11 @@ plugins {
 }
 
 group = 'com.github.lupaev'
-version = '0.0.1-SNAPSHOT'
+version = '0.0.1'
 
 java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(17)
-    }
+    sourceCompatibility = '17'
+    targetCompatibility = '17'
 }
 
 configurations {
@@ -38,6 +37,9 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    testImplementation 'com.h2database:h2:2.3.232'
+    implementation 'org.mapstruct:mapstruct:1.5.5.Final'
+    annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
 }
 
 dependencyManagement {
@@ -48,4 +50,18 @@ dependencyManagement {
 
 tasks.named('test') {
     useJUnitPlatform()
+}
+
+tasks.named('jar').configure {
+    enabled = false
+}
+
+tasks.named('wrapper'){
+    gradleVersion = '8.8'
+}
+
+bootJar {
+    from('src/main/frontend') {
+        into 'META-INF/frontend'
+    }
 }
