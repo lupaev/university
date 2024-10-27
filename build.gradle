@@ -33,9 +33,10 @@ dependencies {
     implementation 'com.vaadin:vaadin-spring-boot-starter'
     implementation 'org.liquibase:liquibase-core'
     compileOnly 'org.projectlombok:lombok'
-    runtimeOnly 'com.mysql:mysql-connector-j'
+
     annotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    runtimeOnly 'org.postgresql:postgresql'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     testImplementation 'com.h2database:h2:2.3.232'
     implementation 'org.mapstruct:mapstruct:1.5.5.Final'
